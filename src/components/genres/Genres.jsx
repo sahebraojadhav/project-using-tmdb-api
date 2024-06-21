@@ -13,7 +13,7 @@ function Genres({data}) {
             if(genres && !genres[g]?.name) return;
             return (
                 <div key={g} className="genre">
-                    {genres[g]?.name}
+                    {genres && genres[g]?.name}
                 </div>
             )
         })
