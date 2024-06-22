@@ -1,12 +1,99 @@
-import React from 'react'
-import './style.scss'
+import React, { useState, useEffect } from "react";
+import { useParams } from "react-router-dom";
+import InfiniteScroll from "react-infinite-scroll-component";
 
-function SearchResult() {
+import "./style.scss";
+
+import { fetchDataFromApi } from "../../Utils/api";
+import ContentWrapper from "../../components/contentWrapper/ContentWrapper";
+//import MovieCard from "../../components/movieCard/MovieCard";
+import Spinner from "../../components/spinner/Spinner";
+import MovieCard from "../../components/movieCard/MovieCard";
+//import noResults from "../../assets/no-results.png";
+
+const SearchResult = () => {
+  const [data, setData] = useState(null);
+  const [pageNum, setPageNum] = useState(1);
+  const [loading, setLoading] = useState(false);
+  const { query } = useParams();
+
+  const fetchInitialData = () => {
+    console.log("this is working");
+    setLoading(true);
+    fetchDataFromApi(`/search/multi?query=${query}&page=${pageNum}`).then(
+      (res) => {
+        console.log(res);
+        setData(res);
+        setPageNum((prev) => prev + 1);
+        setLoading(false);
+      }
+    );
+  };
+
+  const fetchNextPageData = () => {
+    fetchDataFromApi(`/search/multi?query=${query}&page=${pageNum}`).then(
+      (res) => {
+        if (data?.result) {
+          setData({ ...data, resuls: [...data?.resuls, ...res.resuls] });
+        } else {
+          setData(res);
+        }
+        setPageNum((prev) => prev + 1);
+      }
+    );
+  };
+
+  useEffect(() => {
+    setPageNum(1);
+    fetchInitialData();
+  }, [query]);
+
+  console.log("data.....",data)
+
   return (
-    <div>
-      SearchResult
-    </div>
-  )
-}
+    <div className="searchResultsPage">
+    {
+      loading && <Spinner initial={true}/>
+    }
 
-export default SearchResult
+    {
+      !loading && (
+        <ContentWrapper>
+         
+          { data?.results?.length > 0 ?(
+            <>
+              <div className="pageTitle">
+                {`Search ${data?.total_results > 1 ? "results" : "result"} of '${query}'`}
+              </div>
+             <InfiniteScroll
+              className="content"
+              dataLength={data?.results?.length || []}
+              next={fetchNextPageData}
+              hasMore={pageNum<=data?.total_pages}
+              loader={<Spinner/>}
+             >
+                {
+                  data?.results?.map((item ,index)=>{
+                    if(item.media_type === "person") return;
+                    return(
+                      <MovieCard key={index} data={item} fromSearch={true}/>
+                    )
+                  })
+                }
+             </InfiniteScroll>
+            </>
+          ):(
+            <span className="resulNotFound">
+              Sorry , Results not found !
+            </span>
+          )
+          }
+        </ContentWrapper>
+      )
+    }
+   
+  </div>
+  )
+};
+
+export default SearchResult;

@@ -10,7 +10,6 @@ import { PlayIcon } from "../detailsBanner/Playbtn";
 const VideosSection = ({ data, loading }) => {
     const [show, setShow] = useState(false);
     const [videoId, setVideoId] = useState(null);
-    console.log(data?.results[0]);
 
     const loadingSkeleton = () => {
         return (
