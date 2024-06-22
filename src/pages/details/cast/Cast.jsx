@@ -26,10 +26,10 @@ const Cast = ({ data, loading }) => {
                 {!loading ? (
                   <div className="listItems">
                     {
-                        data.map((item)=>{
+                        data?.map((item,idx)=>{
                             let imgUrl=item.profile_path ? url.profile+item.profile_path :avatar;
                             return(
-                                <div className="listItem">
+                                <div className="listItem" key={idx}>
                                     <div className="profileImg">
                                         <Img src={imgUrl}/>
                                     </div>
