@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { HiOutlineSearch } from "react-icons/hi";
 import { SlMenu } from "react-icons/sl";
 import { VscChromeClose } from "react-icons/vsc";
@@ -8,15 +8,17 @@ import "./style.scss";
 
 import ContentWrapper from "../contentWrapper/ContentWrapper";
 import logo from "../../assets/movix-logo.svg";
+import { Placeholder } from "react-select/animated";
 
 function Header() {
   const [show, setShow] = useState("top");
   const [lastScrollY, setLastScrollY] = useState(0);
   const [mobileMenu, setMobileMenu] = useState(false);
-  const [query, setQuery] = useState("");
+  const [query, setQuery] = useState('');
   const [showSearch, setShowSearch] = useState("");
   const navigate = useNavigate();
   const location = useLocation();
+  const inputRef=useRef();
 
   useEffect(()=>{
     window.scrollTo(0,0);
@@ -46,15 +48,21 @@ function Header() {
   },[lastScrollY ])
 
   const searchQueryHandler = (event) => {
+    console.log("here we are")
     if (event.key === "Enter" && query.length > 0) {
+      setQuery('');
+      let timeoutId=setTimeout(() => {
+        setShowSearch(false)
+      }, 100);
       navigate(`/search/${query}`);
     }
-    setTimeout(() => {
-      setShowSearch(false)
-    }, 1000);
+    
   };
 
   const openSearch=()=>{
+   setTimeout(()=>{
+    inputRef.current.focus();
+   },0)
     setMobileMenu(false);
     setShowSearch(true)
   }
@@ -72,6 +80,8 @@ function Header() {
       navigate("/explore/tv")
     }
   }
+
+  console.log(query);
 
   return (
     <header className={`header ${mobileMenu ? "mobileView" : ""} ${show}`}>
@@ -99,8 +109,9 @@ function Header() {
         <ContentWrapper>
         <div className="searchInput">
             <input
-              type="text"
-              placeholder="Search for a movie or tv shows..."
+              ref={inputRef}
+              placeholder={query === '' ? "Enter the movie name here" : ''}
+              value={query || ''} // Ensure controlled component by always providing a value 
               onKeyUp={searchQueryHandler}
               onChange={(e) => setQuery(e.target.value)}
             />
